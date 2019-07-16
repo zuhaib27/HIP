@@ -430,6 +430,13 @@ void ihipStream_t::lockclose_postKernelCommand(const char* kernelName, hc::accel
 };
 
 
+//--
+// Unlock the stream
+void ihipStream_t::lockclose() 
+{
+        _criticalData.unlock();  // paired with lock from lockopen_preKernelCommand.
+}
+
 //=============================================================================
 // Recompute the peercnt and the packed _peerAgents whenever a peer is added or deleted.
 // The packed _peerAgents can efficiently be used on each memory allocation.
@@ -1477,6 +1484,8 @@ hipError_t ihipStreamSynchronize(hipStream_t stream) {
 
 void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     hipError_t e = hipSuccess;
+    hc::accelerator_view* acc_v;
+    acc_v = cb->_stream->locked_getAv();
 
     // Synchronize stream
     tprintf(DB_SYNC, "ihipStreamCallbackHandler wait on stream %s\n",
@@ -1484,7 +1493,10 @@ void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     e = ihipStreamSynchronize(cb->_stream);
 
     // Call registered callback function
+    cb->_stream->lockopen_preKernelCommand();
     cb->_callback(cb->_stream, e, cb->_userData);
+    cb->_stream->lockclose();
+
     delete cb;
 }
 

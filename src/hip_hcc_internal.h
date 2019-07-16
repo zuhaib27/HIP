@@ -550,6 +550,7 @@ class ihipStream_t {
     // the critical mutex.
     LockedAccessor_StreamCrit_t lockopen_preKernelCommand();
     void lockclose_postKernelCommand(const char* kernelName, hc::accelerator_view* av);
+    void lockclose();
 
 
     void locked_wait();
