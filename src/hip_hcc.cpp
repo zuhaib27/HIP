@@ -437,7 +437,7 @@ void ihipStream_t::lockclose_postKernelCommand(const char* kernelName, hc::accel
 // Unlock the stream
 void ihipStream_t::lockclose() 
 {
-        _criticalData.unlock();  // paired with lock from lockopen_preKernelCommand.
+        _criticalData.unlock();
 }
 
 //=============================================================================
