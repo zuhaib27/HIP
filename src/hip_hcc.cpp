@@ -1499,7 +1499,6 @@ void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     cb->_stream->lockopen_preKernelCommand();
     cb->_callback(cb->_stream, e, cb->_userData);
     cb->_stream->lockclose();
-
     delete cb;
 }
 
