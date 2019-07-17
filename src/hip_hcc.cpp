@@ -1487,9 +1487,7 @@ hipError_t ihipStreamSynchronize(hipStream_t stream) {
 
 void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     hipError_t e = hipSuccess;
-    hc::accelerator_view* acc_v;
-    acc_v = cb->_stream->locked_getAv();
-
+    
     // Synchronize stream
     tprintf(DB_SYNC, "ihipStreamCallbackHandler wait on stream %s\n",
             ToString(cb->_stream).c_str());
