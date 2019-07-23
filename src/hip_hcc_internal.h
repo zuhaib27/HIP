@@ -952,7 +952,7 @@ hipError_t hipModuleGetFunctionEx(hipFunction_t* hfunc, hipModule_t hmod,
 
 
 hipStream_t ihipSyncAndResolveStream(hipStream_t, bool lockAcquired = 0);
-hipError_t ihipStreamSynchronize(hipStream_t stream);
+hipError_t ihipStreamSynchronize(hipStream_t stream, bool unblock = true);
 void ihipStreamCallbackHandler(ihipStreamCallback_t* cb);
 
 // Stream printf functions:
