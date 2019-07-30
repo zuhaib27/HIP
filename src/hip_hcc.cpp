@@ -1486,6 +1486,7 @@ hipError_t ihipStreamSynchronize(hipStream_t stream, bool unblock) {
         ihipCtx_t* ctx = ihipGetTlsDefaultCtx();
         ctx->locked_syncDefaultStream(true /*waitOnSelf*/, true /*syncToHost*/);
     } else {
+        // note this does not synchornize with the NULL stream:
         stream->locked_wait();
         e = hipSuccess;
     }
