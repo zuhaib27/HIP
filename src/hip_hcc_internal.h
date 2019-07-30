@@ -554,8 +554,6 @@ class ihipStream_t {
 
     void lockclose();
 
-    void lockopen();
-
     void locked_wait();
 
     hc::accelerator_view* locked_getAv() {

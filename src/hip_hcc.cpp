@@ -432,12 +432,7 @@ void ihipStream_t::lockclose_postKernelCommand(const char* kernelName, hc::accel
     }
 };
 
-//--
-// lock the stream
-void ihipStream_t::lockopen() 
-{
-        _criticalData.lock();
-}
+
 //--
 // Unlock the stream
 void ihipStream_t::lockclose() 
@@ -1506,7 +1501,7 @@ void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     e = ihipStreamSynchronize(cb->_stream, false);
 
     // Call registered callback function
-    cb->_stream->lockopen_preKernelCommand(); // block stream before callback
+    //cb->_stream->lockopen_preKernelCommand(); // block stream before callback
     cb->_callback(cb->_stream, e, cb->_userData);
     cb->_stream->lockclose(); //unblock stream after callback execution completes.
     //printf("made it here\n");
