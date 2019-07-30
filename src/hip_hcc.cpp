@@ -1477,21 +1477,21 @@ hipError_t hip_init() {
 
 hipError_t ihipStreamSynchronize(hipStream_t stream, bool unblock) {
     hipError_t e = hipSuccess;
-
+    if (!unblock) //--testing
+    {
+        stream->lockclose(); //unlocks stream 
+    }
     if (stream == hipStreamNull) {
         ihipCtx_t* ctx = ihipGetTlsDefaultCtx();
         ctx->locked_syncDefaultStream(true /*waitOnSelf*/, true /*syncToHost*/);
     } else {
         // note this does not synchornize with the NULL stream:
-        //if (!unblock) --testing
-        //{
-          //  stream->lockopen_preKernelCommand();
-        //}
-       // else
-       // {
-            stream->locked_wait();
-       // }
+        stream->locked_wait();
         e = hipSuccess;
+    }
+    if (!unblock) //--testing
+    {
+        stream->lockopen_preKernelCommand();  //blocks stream
     }
 
     return e;
@@ -1506,10 +1506,8 @@ void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     e = ihipStreamSynchronize(cb->_stream, false);
 
     // Call registered callback function
-    cb->_stream->lockopen_preKernelCommand(); // block stream before callback
     cb->_callback(cb->_stream, e, cb->_userData);
     cb->_stream->lockclose(); //unblock stream after callback execution completes.
-    //printf("made it here\n");
     delete cb;
 }
 
