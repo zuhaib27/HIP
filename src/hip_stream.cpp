@@ -262,7 +262,7 @@ hipError_t hipStreamAddCallback(hipStream_t stream, hipStreamCallback_t callback
 
     // Create a thread in detached mode to handle callback
     ihipStreamCallback_t* cb = new ihipStreamCallback_t(stream, callback, userData);
-    cb->_stream->lockopen_preKernelCommand(); //this blocks the stream for anything extra to be added. --testing
+    cb->_stream->lockopen(); //this blocks the stream for anything extra to be added. --testing
     std::thread(ihipStreamCallbackHandler, cb).detach();
 
     return ihipLogStatus(e);

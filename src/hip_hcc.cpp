@@ -440,6 +440,13 @@ void ihipStream_t::lockclose()
         _criticalData.unlock();
 }
 
+//--
+// lock the stream
+void ihipStream_t::lockopen() 
+{
+        _criticalData.lock();
+}
+
 //=============================================================================
 // Recompute the peercnt and the packed _peerAgents whenever a peer is added or deleted.
 // The packed _peerAgents can efficiently be used on each memory allocation.
@@ -1472,21 +1479,18 @@ hipError_t hip_init() {
 
 hipError_t ihipStreamSynchronize(hipStream_t stream, bool unblock) {
     hipError_t e = hipSuccess;
-
+    if (!unblock){
+        stream->lockclose();
+    }
     if (stream == hipStreamNull) {
         ihipCtx_t* ctx = ihipGetTlsDefaultCtx();
         ctx->locked_syncDefaultStream(true /*waitOnSelf*/, true /*syncToHost*/);
     } else {
-        // note this does not synchornize with the NULL stream:
-        //if (!unblock) --testing
-        //{
-          //  stream->lockopen_preKernelCommand();
-        //}
-       // else
-       // {
-            stream->locked_wait();
-       // }
+        stream->locked_wait();
         e = hipSuccess;
+    }
+    if (!unblock){
+        stream->lockopen_preKernelCommand();
     }
 
     return e;
@@ -1501,10 +1505,9 @@ void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     e = ihipStreamSynchronize(cb->_stream, false);
 
     // Call registered callback function
-    //cb->_stream->lockopen_preKernelCommand(); // block stream before callback
     cb->_callback(cb->_stream, e, cb->_userData);
     cb->_stream->lockclose(); //unblock stream after callback execution completes.
-    //printf("made it here\n");
+
     delete cb;
 }
 
