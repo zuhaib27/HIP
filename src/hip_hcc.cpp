@@ -407,13 +407,6 @@ void ihipStream_t::lockclose()
         _criticalData.unlock();
 }
 
-//--
-// lock the stream
-void ihipStream_t::lockopen() 
-{
-        _criticalData.lock();
-}
-
 //=============================================================================
 // Recompute the peercnt and the packed _peerAgents whenever a peer is added or deleted.
 // The packed _peerAgents can efficiently be used on each memory allocation.
