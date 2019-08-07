@@ -320,12 +320,12 @@ void ihipStream_t::wait(LockedAccessor_StreamCrit_t& crit) {
 
 //---
 // Wait for all kernel and data copy commands in this stream to complete.
-void ihipStream_t::locked_wait() {
+void ihipStream_t::locked_wait(bool unlockNotNeeded) {
     // create a marker while holding stream lock,
     // but release lock prior to waiting on the marker
     hc::completion_future marker;
     {
-        LockedAccessor_StreamCrit_t crit(_criticalData);
+        LockedAccessor_StreamCrit_t crit(_criticalData, unlockNotNeeded);
         marker = crit->_av.create_marker(hc::no_scope);
     }
 
@@ -1483,22 +1483,22 @@ hipError_t hip_init() {
 }
 }
 
-hipError_t ihipStreamSynchronize(hipStream_t stream, bool unblock) {
+hipError_t ihipStreamSynchronize(hipStream_t stream, bool unlockNotNeeded) {
     hipError_t e = hipSuccess;
-    if (!unblock){
+    /*if (!unblock){ //--testing
         stream->lockclose();
-    }
+    }*/
     if (stream == hipStreamNull) {
         ihipCtx_t* ctx = ihipGetTlsDefaultCtx();
         ctx->locked_syncDefaultStream(true /*waitOnSelf*/, true /*syncToHost*/);
     } else {
         // note this does not synchornize with the NULL stream:
-        stream->locked_wait();
+        stream->locked_wait(unlockNotNeeded);
         e = hipSuccess;
     }
-    if (!unblock){
+    /*if (!unblock){ //--testing
         stream->lockopen_preKernelCommand();
-    }
+    }*/
 
     return e;
 }
@@ -1509,11 +1509,11 @@ void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     // Synchronize stream
     tprintf(DB_SYNC, "ihipStreamCallbackHandler wait on stream %s\n",
             ToString(cb->_stream).c_str());
-    e = ihipStreamSynchronize(cb->_stream, false);
+    e = ihipStreamSynchronize(cb->_stream, 0);
 
     // Call registered callback function
     cb->_callback(cb->_stream, e, cb->_userData);
-    cb->_stream->lockclose(); //unblock stream after callback execution completes.
+    cb->_stream->lockclose(); //unblock stream after callback execution completes. --testing
 
     delete cb;
 }

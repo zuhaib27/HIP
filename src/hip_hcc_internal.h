@@ -555,7 +555,7 @@ class ihipStream_t {
 
     void lockopen();
 
-    void locked_wait();
+    void locked_wait(bool unlockNotNeeded = 1);
 
     hc::accelerator_view* locked_getAv() {
         LockedAccessor_StreamCrit_t crit(_criticalData);
@@ -952,7 +952,7 @@ hipError_t hipModuleGetFunctionEx(hipFunction_t* hfunc, hipModule_t hmod,
 
 
 hipStream_t ihipSyncAndResolveStream(hipStream_t, bool lockAcquired = 0);
-hipError_t ihipStreamSynchronize(hipStream_t stream, bool unblock = true);
+hipError_t ihipStreamSynchronize(hipStream_t stream, bool unlockNotNeeded = 1);
 void ihipStreamCallbackHandler(ihipStreamCallback_t* cb);
 
 // Stream printf functions:
