@@ -67,19 +67,18 @@ THE SOFTWARE.
 #define HIP_LAUNCH_PARAM_END ((void*)0x03)
 
 #ifdef __cplusplus
-  #include <algorithm>
-  #include <mutex>
-  #include <string>
-  #include <unordered_map>
-  #include <vector>
-
   #define __dparm(x) \
           = x
 #else
   #define __dparm(x)
 #endif
 
+#ifdef __GNUC__
+#pragma GCC visibility push (default)
+#endif
+
 #ifdef __cplusplus
+
 namespace hip_impl {
 hipError_t hip_init();
 }  // namespace hip_impl
@@ -1883,15 +1882,27 @@ hipError_t hipMemcpy2D(void* dst, size_t dpitch, const void* src, size_t spitch,
                        size_t height, hipMemcpyKind kind);
 
 /**
-*  @brief Copies memory for 2D arrays.
-*  @param[in]   pCopy Parameters for the memory copy
+ *  @brief Copies memory for 2D arrays.
+ *  @param[in]   pCopy Parameters for the memory copy
+ *  @return      #hipSuccess, #hipErrorInvalidValue, #hipErrorInvalidPitchValue,
+ *  #hipErrorInvalidDevicePointer, #hipErrorInvalidMemcpyDirection
+ *
+ *  @see hipMemcpy, hipMemcpy2D, hipMemcpyToArray, hipMemcpy2DToArray, hipMemcpyFromArray,
+ * hipMemcpyToSymbol, hipMemcpyAsync
+*/
+hipError_t hipMemcpyParam2D(const hip_Memcpy2D* pCopy);
+
+/**
+ *  @brief Copies memory for 2D arrays.
+ *  @param[in]   pCopy Parameters for the memory copy
+ *  @param[in]   stream Stream to use
  *  @return      #hipSuccess, #hipErrorInvalidValue, #hipErrorInvalidPitchValue,
  * #hipErrorInvalidDevicePointer, #hipErrorInvalidMemcpyDirection
  *
  *  @see hipMemcpy, hipMemcpy2D, hipMemcpyToArray, hipMemcpy2DToArray, hipMemcpyFromArray,
  * hipMemcpyToSymbol, hipMemcpyAsync
 */
-hipError_t hipMemcpyParam2D(const hip_Memcpy2D* pCopy);
+hipError_t hipMemcpyParam2DAsync(const hip_Memcpy2D* pCopy, hipStream_t stream __dparm(0));
 
 /**
  *  @brief Copies data between host and device.
@@ -2603,15 +2614,26 @@ hipError_t hipModuleUnload(hipModule_t module);
 hipError_t hipModuleGetFunction(hipFunction_t* function, hipModule_t module, const char* kname);
 
 /**
- * @bried Find out attributes for a given function.
+ * @brief Find out attributes for a given function.
  *
  * @param [out] attr
  * @param [in] func
  *
- * @returns hipSuccess, hipErrorInvalidDeviceFunction
+ * @returns hipSuccess, hipErrorInvalidValue, hipErrorInvalidDeviceFunction
  */
 
 hipError_t hipFuncGetAttributes(struct hipFuncAttributes* attr, const void* func);
+
+/**
+ * @brief Find out a specific attribute for a given function.
+ *
+ * @param [out] value
+ * @param [in]  attrib
+ * @param [in]  hfunc
+ *
+ * @returns hipSuccess, hipErrorInvalidValue, hipErrorInvalidDeviceFunction
+ */
+hipError_t hipFuncGetAttribute(int* value, hipFunction_attribute attrib, hipFunction_t hfunc);
 
 #if !__HIP_VDI__
 #if defined(__cplusplus)
@@ -3222,6 +3244,9 @@ hipError_t hipDestroySurfaceObject(hipSurfaceObject_t surfaceObject);
 
 #endif
 
+#ifdef __GNUC__
+#pragma GCC visibility pop
+#endif
 
 /**
  *-------------------------------------------------------------------------------------------------
