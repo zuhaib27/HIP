@@ -1484,7 +1484,7 @@ hipError_t ihipStreamSynchronize(TlsData *tls, hipStream_t stream, bool lockNeed
 
 void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     hipError_t e = hipSuccess;
-
+    //cb->_stream->_LockNeeded = false;
     // Synchronize stream
     tprintf(DB_SYNC, "ihipStreamCallbackHandler wait on stream %s\n",
             ToString(cb->_stream).c_str());
@@ -1494,7 +1494,7 @@ void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     // Call registered callback function
     cb->_callback(cb->_stream, e, cb->_userData);
     cb->_stream->lockclose(); //unblock stream after callback execution completes. --testing
-
+    cb->_stream->_LockNeeded = true;
     delete cb;
 }
 
@@ -1606,7 +1606,7 @@ hipStream_t ihipPreLaunchKernel(hipStream_t stream, dim3 grid, dim3 block, grid_
     lp->barrier_bit = barrier_bit_queue_default;
     lp->launch_fence = -1;
 
-    if (!lockAcquired) {
+    if (!lockAcquired && (stream->_LockNeeded)) {
         auto crit = stream->lockopen_preKernelCommand();
         lp->av = &(crit->_av);
     } else {

@@ -577,8 +577,14 @@ class ihipStream_t {
     void locked_wait(bool lockNeeded = true);
 
     hc::accelerator_view* locked_getAv() {
-        LockedAccessor_StreamCrit_t crit(_criticalData);
-        return &(crit->_av);
+        if (_LockNeeded){
+            LockedAccessor_StreamCrit_t crit(_criticalData);
+            return &(crit->_av);
+        }else{
+            return &(_criticalData._av);
+        }
+        
+        
     };
 
     void locked_streamWaitEvent(ihipEventData_t& event);
@@ -615,6 +621,7 @@ class ihipStream_t {
     // Public member vars - these are set at initialization and never change:
     SeqNum_t _id;  // monotonic sequence ID.  0 is the default stream.
     unsigned _flags;
+    bool _LockNeeded = true;
 
 
    private:

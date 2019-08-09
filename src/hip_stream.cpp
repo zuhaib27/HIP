@@ -261,8 +261,16 @@ hipError_t hipStreamAddCallback(hipStream_t stream, hipStreamCallback_t callback
 
     // Create a thread in detached mode to handle callback
     ihipStreamCallback_t* cb = new ihipStreamCallback_t(stream, callback, userData);
-    LockedAccessor_StreamCrit_t crit(stream->criticalData(), false);    //lock stream
-    std::thread(ihipStreamCallbackHandler, cb).detach();
+    //if(stream->_LockNeeded || flags == 2)  --testing: idea of calling callback again in another thread to deal with synchronization between callback calls...
+    //{
+        LockedAccessor_StreamCrit_t crit(stream->criticalData(), false);    //lock stream
+        stream->_LockNeeded = false;
+        std::thread(ihipStreamCallbackHandler, cb).detach();
+    //}
+    //else
+    //{
+    //    std::thread(hipStreamAddCallback, stream, callback, &userData, 2).detach();
+    //}
 
     return ihipLogStatus(e);
 }
