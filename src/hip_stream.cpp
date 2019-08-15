@@ -182,8 +182,12 @@ hipError_t hipStreamQuery(hipStream_t stream) {
 //---
 hipError_t hipStreamSynchronize(hipStream_t stream) {
     HIP_INIT_SPECIAL_API(hipStreamSynchronize, TRACE_SYNC, stream);
-
+    
+    while(stream->isCallbackInProg()){   //Need to find correct implementation to make synchronize timing wait on callback.. --testing
+        //waiting on callbacks to complete... Temporary solution.
+    }
     return ihipLogStatus(ihipStreamSynchronize(tls, stream));
+    
 }
 
 
@@ -261,16 +265,8 @@ hipError_t hipStreamAddCallback(hipStream_t stream, hipStreamCallback_t callback
 
     // Create a thread in detached mode to handle callback
     ihipStreamCallback_t* cb = new ihipStreamCallback_t(stream, callback, userData);
-    //if(stream->_LockNeeded || flags == 2)  --testing: idea of calling callback again in another thread to deal with synchronization between callback calls...
-    //{
-        LockedAccessor_StreamCrit_t crit(stream->criticalData(), false);    //lock stream
-        stream->_LockNeeded = false;
-        std::thread(ihipStreamCallbackHandler, cb).detach();
-    //}
-    //else
-    //{
-    //    std::thread(hipStreamAddCallback, stream, callback, &userData, 2).detach();
-    //}
+    std::thread(ihipStreamCallbackHandler, cb, false).detach();
+    cb->_stream->_callbacksInProgress += 1;
 
     return ihipLogStatus(e);
 }

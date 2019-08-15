@@ -583,9 +583,11 @@ class ihipStream_t {
         }else{
             return &(_criticalData._av);
         }
-        
-        
     };
+
+    bool isCallbackInProg() {
+        return (_callbacksInProgress == 0);
+    }
 
     void locked_streamWaitEvent(ihipEventData_t& event);
     hc::completion_future locked_recordEvent(hipEvent_t event);
@@ -622,6 +624,7 @@ class ihipStream_t {
     SeqNum_t _id;  // monotonic sequence ID.  0 is the default stream.
     unsigned _flags;
     bool _LockNeeded = true;
+    int _callbacksInProgress = 0;
 
 
    private:
@@ -979,7 +982,7 @@ hipStream_t ihipSyncAndResolveStream(hipStream_t, bool lockAcquired = 0);
 
 hipError_t ihipStreamSynchronize(TlsData *tls, hipStream_t stream, bool lockNeeded = true);
 
-void ihipStreamCallbackHandler(ihipStreamCallback_t* cb);
+void ihipStreamCallbackHandler(ihipStreamCallback_t* cb, bool lockNeeded = false);
 
 // Stream printf functions:
 inline std::ostream& operator<<(std::ostream& os, const ihipStream_t& s) {

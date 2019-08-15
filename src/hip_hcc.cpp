@@ -1482,9 +1482,12 @@ hipError_t ihipStreamSynchronize(TlsData *tls, hipStream_t stream, bool lockNeed
     return e;
 }
 
-void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
+void ihipStreamCallbackHandler(ihipStreamCallback_t* cb, bool lockNeeded) {
     hipError_t e = hipSuccess;
-    //cb->_stream->_LockNeeded = false;
+    
+    LockedAccessor_StreamCrit_t crit(cb->_stream->criticalData(), false);    //lock stream
+    cb->_stream->_LockNeeded = false;   //flag that no additional locks are needed to avoid deadlock --testing
+
     // Synchronize stream
     tprintf(DB_SYNC, "ihipStreamCallbackHandler wait on stream %s\n",
             ToString(cb->_stream).c_str());
@@ -1495,6 +1498,8 @@ void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     cb->_callback(cb->_stream, e, cb->_userData);
     cb->_stream->lockclose(); //unblock stream after callback execution completes. --testing
     cb->_stream->_LockNeeded = true;
+    cb->_stream->_callbacksInProgress =-1;   //method to resolve timing issue. --testing
+    
     delete cb;
 }
 
