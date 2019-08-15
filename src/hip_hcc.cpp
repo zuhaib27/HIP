@@ -1498,7 +1498,7 @@ void ihipStreamCallbackHandler(ihipStreamCallback_t* cb, bool lockNeeded) {
     cb->_callback(cb->_stream, e, cb->_userData);
     cb->_stream->lockclose(); //unblock stream after callback execution completes. --testing
     cb->_stream->_LockNeeded = true;
-    cb->_stream->_callbacksInProgress =-1;   //method to resolve timing issue. --testing
+    cb->_stream->_callbacksInProgress -=1;   //method to resolve timing issue. --testing
     
     delete cb;
 }

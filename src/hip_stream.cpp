@@ -183,7 +183,7 @@ hipError_t hipStreamQuery(hipStream_t stream) {
 hipError_t hipStreamSynchronize(hipStream_t stream) {
     HIP_INIT_SPECIAL_API(hipStreamSynchronize, TRACE_SYNC, stream);
     
-    while(stream->isCallbackInProg()){   //Need to find correct implementation to make synchronize timing wait on callback.. --testing
+    while(stream->_callbacksInProgress > 0){   //Need to find correct implementation to make synchronize timing wait on callback.. --testing
         //waiting on callbacks to complete... Temporary solution.
     }
     return ihipLogStatus(ihipStreamSynchronize(tls, stream));

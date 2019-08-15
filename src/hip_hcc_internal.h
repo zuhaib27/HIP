@@ -585,10 +585,6 @@ class ihipStream_t {
         }
     };
 
-    bool isCallbackInProg() {
-        return (_callbacksInProgress == 0);
-    }
-
     void locked_streamWaitEvent(ihipEventData_t& event);
     hc::completion_future locked_recordEvent(hipEvent_t event);
 
