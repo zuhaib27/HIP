@@ -1484,7 +1484,7 @@ hipError_t ihipStreamSynchronize(TlsData *tls, hipStream_t stream, bool lockNeed
 
 void ihipStreamCallbackHandler(ihipStreamCallback_t* cb) {
     hipError_t e = hipSuccess;
-    //cb->_stream->_LockNeeded = false;
+
     // Synchronize stream
     tprintf(DB_SYNC, "ihipStreamCallbackHandler wait on stream %s\n",
             ToString(cb->_stream).c_str());
